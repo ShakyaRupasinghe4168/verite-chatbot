@@ -1,13 +1,23 @@
 import streamlit as st
 from agent import agent_chat
 
+# Page config
 st.set_page_config(page_title="Verité Research Assistant", layout="centered")
 
-st.title("Verité — Verité Research Assistant")
+# Title and trial warning
+st.title("Verity — Verité Research Assistant")
+st.markdown(
+    "<div style='color: white; font-size: 14px; margin-bottom: 10px;'>"
+    "⚠️ You have only a limited number of trials as this is a free trial."
+    "</div>",
+    unsafe_allow_html=True
+)
 
+# Initialize chat session state
 if "chat" not in st.session_state:
     st.session_state.chat = []
 
+# User input box
 user_input = st.chat_input("Ask about Verité publications")
 
 if user_input:
@@ -15,6 +25,7 @@ if user_input:
     st.session_state.chat.append(("user", user_input))
     st.session_state.chat.append(("assistant", {"answer": response, "sources": sources}))
 
+# Display chat messages
 for role, msg in st.session_state.chat:
     if role == "user":
         st.markdown(f"""
@@ -41,6 +52,7 @@ for role, msg in st.session_state.chat:
         """, unsafe_allow_html=True)
 
     else:
+        # Assistant answer
         st.markdown(f"""
         <div style="
             display: flex;
@@ -48,8 +60,8 @@ for role, msg in st.session_state.chat:
             margin-top: 10px;
         ">
             <div style="margin-right: 10px; display:flex; align-items:center;">
-    <img src="https://img.icons8.com/fluency/48/000000/chatbot.png" width="30"/>
-</div>
+                <img src="https://img.icons8.com/fluency/48/000000/chatbot.png" width="30"/>
+            </div>
             <div style="
                 max-width: 70%;
                 background-color: #333333;  
@@ -64,8 +76,14 @@ for role, msg in st.session_state.chat:
         </div>
         """, unsafe_allow_html=True)
 
-
-        if msg["sources"]:
+        # Show sources only for valid content-related answers
+        valid_sources = [s for s in msg["sources"] if s.get("source")]
+        if valid_sources:
             st.markdown('<div style="margin-left: 50px; margin-top:5px;"><b>Sources:</b></div>', unsafe_allow_html=True)
-            for s in msg["sources"]:
-                st.markdown(f'<div style="margin-left: 60px; color:#cccccc;">- {s}</div>', unsafe_allow_html=True)
+            for s in valid_sources:
+                st.markdown(f"""
+                <div style="margin-left: 60px; color:#cccccc; margin-bottom:10px;">
+                    <b>{s['source']} - page {s['page']}</b><br>
+                    {s['text']}
+                </div>
+                """, unsafe_allow_html=True)
