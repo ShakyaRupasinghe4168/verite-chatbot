@@ -50,6 +50,10 @@ for i, emb in enumerate(embeddings):
         "metadata":documents[i]
     })
 
-index.upsert(vectors)
+batch_size = 40
+
+for i in range(0, len(vectors), batch_size):
+    batch = vectors[i:i + batch_size]
+    index.upsert(batch)
 
 print("Documents indexed successfully")

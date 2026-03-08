@@ -1,5 +1,10 @@
+import os
 import streamlit as st
 from agent import agent_chat
+from memory_store import load_memory, save_memory
+
+if "chat" not in st.session_state:
+    st.session_state.chat = []
 
 st.set_page_config(page_title="Verité Research Assistant", layout="centered")
 
@@ -13,7 +18,7 @@ st.markdown(
         font-size: 28px;
         font-weight: bold;
         text-align: center;
-        margin-bottom: 20px;
+        margin-bottom: 10px;
     ">
         Verity — The Research Assistant Chatbot
     </div>
@@ -21,20 +26,43 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-st.markdown(
-    "<div style='color: white; font-size: 14px; margin-bottom: 10px;'>"
-    "⚠️ You have only a limited number of trials as this is a free trial."
-    "</div>",
-    unsafe_allow_html=True
-)
-
-if "chat" not in st.session_state:
-    st.session_state.chat = []
+with st.container():
+    st.markdown(
+        """
+        <div style="
+            color: white;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 10px;
+        ">
+            ⚠️ You have only a limited number of trials as this is a free trial.
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+    
+col1, col2, col3 = st.columns([1, 2, 1])  
+with col2:
+    c1, c2 = st.columns(2, gap="large") 
+    with c1:
+        if st.button("Clear Chat", help="Clears the chat messages from the UI only. Memory is preserved."):
+            st.session_state.chat = []  
+    with c2:
+        if st.button("Clear memory", help="Clears the UI and deletes all saved chat memory permanently."):
+            st.session_state.chat = []  
+            if os.path.exists("memory/chat_memory.json"):
+                os.remove("memory/chat_memory.json")  
+            st.experimental_rerun() 
 
 user_input = st.chat_input("Ask about Verité publications")
 
 if user_input:
+    memory = load_memory()
     response, sources = agent_chat(user_input)
+    memory.append({"role": "user", "content": user_input})
+    memory.append({"role": "assistant", "content": response})
+    save_memory(memory)
+
     st.session_state.chat.append(("user", user_input))
     st.session_state.chat.append(("assistant", {"answer": response, "sources": sources}))
 
