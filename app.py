@@ -76,14 +76,20 @@ for role, msg in st.session_state.chat:
         </div>
         """, unsafe_allow_html=True)
 
-        # Show sources only for valid content-related answers
+        # Show sources in collapsible accordions only for valid content-related answers
         valid_sources = [s for s in msg["sources"] if s.get("source")]
         if valid_sources:
-            st.markdown('<div style="margin-left: 50px; margin-top:5px;"><b>Sources:</b></div>', unsafe_allow_html=True)
-            for s in valid_sources:
-                st.markdown(f"""
-                <div style="margin-left: 60px; color:#cccccc; margin-bottom:10px;">
-                    <b>{s['source']} - page {s['page']}</b><br>
-                    {s['text']}
-                </div>
-                """, unsafe_allow_html=True)
+            for idx, s in enumerate(valid_sources, start=1):
+                with st.expander(f"Source [{idx}]: {s['source']} - page {s['page']}", expanded=False):
+                    st.markdown(f"""
+                        <div style="
+                            background-color: #333333;
+                            color: white;
+                            padding: 10px 25px;
+                            border-radius: 15px;
+                            border: 2px solid rgb(177, 56, 91);
+                            font-size: 15px;
+                        ">
+                            {s['text']}
+                        </div>
+                    """, unsafe_allow_html=True)

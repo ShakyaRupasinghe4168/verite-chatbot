@@ -83,7 +83,7 @@ VECTOR_SEARCH
     if not docs:
 
         refusal = (
-            "I'm Verity, an assistant for Verité Research publications. "
+            "I'm an assistant for Verité Research publications. "
             "I can only answer questions based on those publications."
         )
 
