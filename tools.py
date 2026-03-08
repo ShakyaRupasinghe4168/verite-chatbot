@@ -1,27 +1,42 @@
 import os
-from dotenv import load_dotenv
-load_dotenv()
-from pinecone import Pinecone
 from sentence_transformers import SentenceTransformer
+from pinecone import Pinecone
 
 model = SentenceTransformer("all-MiniLM-L6-v2")
 
 pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
+
 index = pc.Index(os.getenv("PINECONE_INDEX"))
 
-def search_documents(query):
 
-    embedding = model.encode(query).tolist()
+def search_documents(query, top_k=6, score_threshold=0.75):
+
+    vector = model.encode(query).tolist()
 
     results = index.query(
-        vector=embedding,
-        top_k=5,
+        vector=vector,
+        top_k=top_k,
         include_metadata=True
     )
 
     docs = []
 
     for match in results["matches"]:
-        docs.append(match["metadata"])
+
+        score = match["score"]
+        meta = match["metadata"]
+        text = meta.get("text", "").strip()
+
+        if score < score_threshold:
+            continue
+
+        if len(text) < 100:
+            continue
+
+        docs.append({
+            "source": meta.get("source"),
+            "page": meta.get("page"),
+            "text": text
+        })
 
     return docs
