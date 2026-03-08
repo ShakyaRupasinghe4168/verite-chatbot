@@ -28,20 +28,31 @@ def extract_used_sources(answer, docs):
 
 
 def agent_chat(user_message):
-
     global memory
 
-    # -------------------------
-    # MEMORY CHECK
-    # -------------------------
+    small_talk_patterns = {
+        r"^(hi|hello|hey|hiya|good morning|good afternoon|good evening)\b": 
+            "Hello! How can I help you with Verité Research publications today?",
+        r"\bhow are you\??\b": 
+            "I'm doing well, thank you! How can I assist you with Verité Research today?",
+        r"\bwhat('s| is) up\??\b": 
+            "Not much, just helping users with Verité Research publications. How can I assist you?",
+        r"\bthank(s| you)\b": 
+            "You're welcome! Do you have any questions about Verité Research publications?",
+        r"\bbye\b": 
+            "Goodbye! Feel free to come back anytime you have questions about Verité Research."
+    }
+
+    for pattern, reply in small_talk_patterns.items():
+        if re.search(pattern, user_message.lower()):
+            memory.append({"role": "user", "content": user_message})
+            memory.append({"role": "assistant", "content": reply})
+            save_memory(memory)
+            return reply, []
 
     if memory:
-
         recent = memory[-6:]
-        history = "\n".join(
-            [f"{m['role']}: {m['content']}" for m in recent]
-        )
-
+        history = "\n".join([f"{m['role']}: {m['content']}" for m in recent])
         memory_prompt = f"""
 {SYSTEM_PROMPT}
 
@@ -53,58 +64,38 @@ User question:
 
 Instructions:
 If the answer exists in the conversation history, answer normally.
-
 If it cannot be answered from the conversation history reply ONLY with:
 VECTOR_SEARCH
 """
-
         response = client.models.generate_content(
             model="gemini-2.5-flash",
             contents=memory_prompt
         )
-
         answer = response.text.strip()
-
         if "VECTOR_SEARCH" not in answer:
-
             memory.append({"role": "user", "content": user_message})
             memory.append({"role": "assistant", "content": answer})
-
             save_memory(memory)
-
             return answer, []
 
-    # -------------------------
-    # VECTOR SEARCH
-    # -------------------------
-
     docs = search_documents(user_message)
-
     if not docs:
-
         refusal = (
             "I'm an assistant for Verité Research publications. "
             "I can only answer questions based on those publications."
         )
-
         memory.append({"role": "user", "content": user_message})
         memory.append({"role": "assistant", "content": refusal})
-
         save_memory(memory)
-
         return refusal, []
-
-    # Build context
 
     context = ""
     for d in docs:
-
         context += f"""
 SOURCE: {d['source']}:{d['page']}
 
 {d['text']}
 """
-
     rag_prompt = f"""
 {SYSTEM_PROMPT}
 
@@ -120,19 +111,14 @@ Instructions:
 • Cite sources like (source:page)
 • Do not invent sources
 """
-
     response = client.models.generate_content(
         model="gemini-2.5-flash",
         contents=rag_prompt
     )
-
     answer = response.text.strip()
-
     used_sources = extract_used_sources(answer, docs)
 
     memory.append({"role": "user", "content": user_message})
     memory.append({"role": "assistant", "content": answer})
-
     save_memory(memory)
-
     return answer, used_sources

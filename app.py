@@ -1,11 +1,26 @@
 import streamlit as st
 from agent import agent_chat
 
-# Page config
 st.set_page_config(page_title="Verité Research Assistant", layout="centered")
 
-# Title and trial warning
-st.title("Verity — Verité Research Assistant")
+st.markdown(
+    """
+    <div style="
+        background-color: rgb(123, 9, 42);
+        color: white;
+        padding: 15px 25px;
+        border-radius: 10px;
+        font-size: 28px;
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 20px;
+    ">
+        Verity — The Research Assistant Chatbot
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
 st.markdown(
     "<div style='color: white; font-size: 14px; margin-bottom: 10px;'>"
     "⚠️ You have only a limited number of trials as this is a free trial."
@@ -13,11 +28,9 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# Initialize chat session state
 if "chat" not in st.session_state:
     st.session_state.chat = []
 
-# User input box
 user_input = st.chat_input("Ask about Verité publications")
 
 if user_input:
@@ -25,11 +38,12 @@ if user_input:
     st.session_state.chat.append(("user", user_input))
     st.session_state.chat.append(("assistant", {"answer": response, "sources": sources}))
 
-# Display chat messages
-for role, msg in st.session_state.chat:
+for idx, (role, msg) in enumerate(st.session_state.chat):
+    container_id = f"msg_{idx}"  
+
     if role == "user":
         st.markdown(f"""
-        <div style="
+        <div id="{container_id}" style="
             display: flex;
             justify-content: flex-end;
             margin-top: 10px;
@@ -39,7 +53,7 @@ for role, msg in st.session_state.chat:
                 background-color: rgb(177, 56, 91);
                 color: white;              
                 padding: 10px 25px;
-                border-radius: 25px;
+                border-radius: 10px;
                 border-bottom-right-radius: 0px;
                 font-size: 16px;
             ">
@@ -52,9 +66,8 @@ for role, msg in st.session_state.chat:
         """, unsafe_allow_html=True)
 
     else:
-        # Assistant answer
         st.markdown(f"""
-        <div style="
+        <div id="{container_id}" style="
             display: flex;
             justify-content: flex-start;
             margin-top: 10px;
@@ -67,20 +80,20 @@ for role, msg in st.session_state.chat:
                 background-color: #333333;  
                 color: white; 
                 padding: 10px 25px;
-                border-radius: 25px;
+                border-radius: 10px;
                 border-bottom-left-radius: 0px;
                 font-size: 16px;
+                margin-bottom: 10px;
             ">
                 {msg['answer']}
             </div>
         </div>
         """, unsafe_allow_html=True)
 
-        # Show sources in collapsible accordions only for valid content-related answers
         valid_sources = [s for s in msg["sources"] if s.get("source")]
         if valid_sources:
-            for idx, s in enumerate(valid_sources, start=1):
-                with st.expander(f"Source [{idx}]: {s['source']} - page {s['page']}", expanded=False):
+            for idx_s, s in enumerate(valid_sources, start=1):
+                with st.expander(f"Source [{idx_s}]: {s['source']} - page {s['page']}", expanded=False):
                     st.markdown(f"""
                         <div style="
                             background-color: #333333;
@@ -89,7 +102,17 @@ for role, msg in st.session_state.chat:
                             border-radius: 15px;
                             border: 2px solid rgb(177, 56, 91);
                             font-size: 15px;
+                            margin-bottom: 5px;
                         ">
                             {s['text']}
                         </div>
                     """, unsafe_allow_html=True)
+
+st.markdown("""
+    <script>
+        const messages = document.querySelectorAll('[id^="msg_"]');
+        if (messages.length > 0) {
+            messages[messages.length - 1].scrollIntoView({behavior: "smooth"});
+        }
+    </script>
+""", unsafe_allow_html=True)
