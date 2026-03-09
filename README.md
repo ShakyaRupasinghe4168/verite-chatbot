@@ -12,7 +12,7 @@ It uses vector search and conversation memory to answer questions with citations
 - Chat UI with user and assistant messages.
 - Inline source citations `(document_name:page)` and expandable source display.
 - Hybrid search (vector + keyword) for document retrieval.
-- Session memory stored persistently (last 20 messages).
+- Persistent conversation memory across sessions.
 - Small talk handling (greetings, thanks, etc.).
 - Clear Chat (UI only) and Clear Permanently (deletes memory).
 - Out-of-scope question handling (polite refusal).
@@ -72,16 +72,22 @@ streamlit run app.py
   - **Clear Chat:** Clears chat UI only.
   - **Clear Permanently:** Clears UI and deletes memory file.
 
-## 7. Notes About Free Tier Usage
+### Notes About Free Tier Usage
 
-- **Hugging Face Spaces Free Tier**
-  - The app is deployed on the Hugging Face free tier.
-  - Free Spaces **sleep after ~1 hour of inactivity**.
-  - While the Space is active, `memory/chat_memory.json` persists and remembers your chat.
-  - If the Space sleeps, is rebuilt, or restarted, all local memory will reset.
-  - For quick demo or short-term testing, memory persists within the active session.
+#### Hugging Face Spaces (Free Tier)
 
-- **Gemini API Free Tier**
-  - The project uses the free tier of Google Gemini API.
-  - Free tier has a limited number of chat requests per day.
-  - Users should be aware that excessive questions may hit the usage limit, after which responses will fail until the quota resets.
+* The application is deployed on the free tier of Hugging Face Spaces.  
+* Free Spaces may automatically sleep after approximately **1 hour of inactivity**.  
+* While the Space is active, `memory/chat_memory.json` persists, allowing conversation memory across multiple sessions during that period.
+* If the Space sleeps, rebuilds, or restarts, the local memory file may reset.   
+
+#### Gemini API (Free Tier)
+
+* The chatbot uses the **Google Gemini API** free tier for generating responses.  
+* The free tier provides a **limited number of requests per day**.  
+* If the quota is exceeded, the application may temporarily stop responding until the daily quota resets.  
+* 
+* The system currently stores the **last 20 messages** for conversation memory. This limit is configurable and set to 20 for this demo deployment.  As number of messages sent will increase token usage. 
+
+**Note:**  
+These limitations (sleep behavior, request limits, and memory size) are related to free-tier hosting and API usage. They are configured this way for demonstration purposes, and the system architecture can support higher limits in a production deployment.

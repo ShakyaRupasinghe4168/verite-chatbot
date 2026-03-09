@@ -35,7 +35,7 @@ with st.container():
             text-align: center;
             margin-bottom: 10px;
         ">
-            ⚠️ You have only a limited number of trials as this is a free trial.
+             You have only a limited number of trials as this is a free trial.
         </div>
         """,
         unsafe_allow_html=True

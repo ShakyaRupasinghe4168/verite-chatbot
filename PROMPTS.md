@@ -19,6 +19,7 @@ The system prompt defines the persona and behavior of Verity, the AI assistant:
 
 - **Memory Handling:**
   - The agent remembers the last 20 messages across sessions (persistent memory file).
+  - This limit is set for the demo, but it is configurable and can be expanded for production.
   - Only uses vector search if the answer cannot be found in memory.
 
 ---
