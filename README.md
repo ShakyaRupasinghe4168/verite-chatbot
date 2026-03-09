@@ -5,6 +5,8 @@
 Verity is an AI chatbot designed to provide information from Verité Research publications.
 It uses vector search and conversation memory to answer questions with citations.
 
+- Live URL : https://huggingface.co/spaces/shakyarupasinghe/verite-chatbot 
+- Used Documents details & Sample questions and answers: https://drive.google.com/file/d/1QX_9hjimD8Beb0tzq1lMRgOH847YnaJT/view?usp=sharing
 ---
 
 ## Features
